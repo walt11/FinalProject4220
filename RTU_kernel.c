@@ -176,10 +176,19 @@ int init_module(void){
 	*GPIOBIntType2 &= 0xF8; //1111 1000
 
 	int dummy[6][2];
+	int buf=0;
 	rt_set_periodic_mode();
 	period = start_rt_timer(nano2count(1000000));
 	rt_sem_init(&sem,1);
 	rtf_create(0,sizeof(dummy));
+	rtf_create(1,sizeof(int));
+	
+	// this waits for the userspace program to become ready so that the data being
+	// collected does not build up in fifo 0, when a 1 is read from the fifo, then
+	// the tasks are initialzied and started
+	while(buf!=1){
+		rtf_get(1,&buf,sizeof(int));
+	}
 
 	rt_request_irq(59, my_handler, 0, 1);
 	rt_enable_irq(59);

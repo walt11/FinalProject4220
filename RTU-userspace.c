@@ -20,7 +20,8 @@ void read_fifo(){
 	int i,j;
 	int fifo_buffer[6][2];
 	int fd_fifo_in;
-	fd_fifo_in = open("/dev/rtf/0",O_RDWR);
+	fd_fifo_in = open("/dev/rtf/0", O_RDWR); 
+	
 	while(1){
 		read(fd_fifo_in, &fifo_buffer, sizeof(fifo_buffer));
 		for(i=0;i<6;i++){
@@ -35,7 +36,12 @@ void read_fifo(){
 
 int main(void)
 {
+	int ready_fifo;
 	pthread_t readFifo;
+	ready_fifo = open("/dev/rtf/1", O_RDWR);
+	// writes a 1 to the fifo to tell the module that it is ready to receive data
+	write(ready_fifo, 1, sizeof(int)); 
+	
 	//created thread to test reading from the fifo, kernel module must be installed on board first
 	pthread_create(&readFifo, NULL, (void*)&read_fifo,NULL);
 	while(1){}
