@@ -29,7 +29,8 @@ char buffer[100];
 int one;
 int two;
 pthread_t th1, th2, th3, th4, th5;
-int LED=0;
+int sensor=0;
+sem_t sem1;
 struct Data {
 	// status
 	int b1;
@@ -118,6 +119,8 @@ void Button_FIFO(void *x){
 		read(fd_fifo_in, &button, sizeof(int));
 		read(fd_fifo_in, &sec, sizeof(int));
 		read(fd_fifo_in, &usec, sizeof(int));
+
+		sem_wait(&sem1);
 		switch(button){
 			case 1:
 					if(d.b1 == 1){
@@ -147,22 +150,35 @@ void Button_FIFO(void *x){
 					d.b3_time[1] = usec;
 				break;
 		}
+		sem_post(&sem1);
 	}
 }
-void LED_FIFO(void *x){
+void TIME_FIFO(void *x){
 	struct timeval t;
 	int fd_fifo_in = open("/dev/rtf/2", O_RDWR);
 	while(1){
 		if(read(fd_fifo_in, &t, sizeof(t)) == -1){
 			puts("Read from fifo 2 error");
 		}
-		if(LED == 1){
+		if(sensor == 0){
 			// put time retrieved into time for LED 1
 			d.led1_time[0] = t.tv_sec;
 			d.led1_time[1] = t.tv_usec;
-		}else{
+		}else if(sensor == 1){
 			// put time retrieved into time for LED 2
 			d.led2_time[0] = t.tv_sec;
+			d.led2_time[1] = t.tv_usec;
+		}else if(sensor == 2){
+			// put time retrieved into time for LED 2
+			d.b1_time[0] = t.tv_sec;
+			d.led2_time[1] = t.tv_usec;
+		}else if(sensor == 3){
+			// put time retrieved into time for LED 2
+			d.b2_time[0] = t.tv_sec;
+			d.led2_time[1] = t.tv_usec;
+		}else if(sensor == 4){
+			// put time retrieved into time for LED 2
+			d.b3_time[0] = t.tv_sec;
 			d.led2_time[1] = t.tv_usec;
 		}
 	}
@@ -231,6 +247,7 @@ void LED_Test(void *x){
 }
 
 void Rec_Command(void *x){
+	int fd_fifo_in = open("/dev/rtf/1", O_RDWR);
 	int sock, length, n;
 	int command=0;
 	   int boolval = 1;		// for a socket option
@@ -263,13 +280,45 @@ void Rec_Command(void *x){
 
 	   fromlen = sizeof(struct sockaddr_in);	// size of structure
 
-	   while (1)
-	   {
+	   while (1){
 		   // receive from client
 	       n = recvfrom(sock, &command, sizeof(int), 0, (struct sockaddr *)&from, &fromlen);
 	       if (n < 0)
 	    	   error("recvfrom");
 	       printf("Command: %d\n",command);
+	       sensor = command;
+	       sem_wait(&sem1);
+	       if(command == 0){
+	       		if(d.led1 == 1){
+	       			d.led1 = 0;
+	       		}else{
+	       			d.led1 = 1;
+	       		}
+	       }else if(command == 1){
+	       		if(d.led2 == 1){
+	       			d.led2 = 0;
+	       		}
+	       }else if(command == 2){
+	       		if(d.b1 == 1){
+	       			d.b1 = 0;
+	       		}else{
+	       			d.b1 = 1;
+	       		}
+	       }else if(command == 3){
+	       		if(d.b2 == 1){
+	       			d.b2 = 0;
+	       		}else{
+	       			d.b2 = 1;
+	       		}
+	       }else if(command == 4){
+	       		if(d.b3 == 1){
+	       			d.b3 = 0;
+	       		}else{
+	       			d.b3 = 1;
+	       		}
+	       }
+	       sem_post(&sem1);
+	       write(fd_fifo_in,&command,sizeof(int));
 	   }
 }
 
@@ -278,7 +327,7 @@ int main(void){
 	BaseP = start_rt_timer(nano2count(1000000));
 	pthread_create(&th1, NULL, (void*)Send_to_socket, NULL);
 	pthread_create(&th2, NULL, (void*)Button_FIFO, NULL);
-	pthread_create(&th3, NULL, (void*)LED_FIFO, NULL);
+	pthread_create(&th3, NULL, (void*)TIME_FIFO, NULL);
 	pthread_create(&th4, NULL, (void*)LED_Test, NULL);
 	pthread_create(&th5, NULL, (void*)Rec_Command, NULL);
 
@@ -287,6 +336,9 @@ int main(void){
 	pthread_join(th3,0);
 	pthread_join(th4,0);
 	pthread_join(th5,0);
+
+	sem_init(&sem1,0,1);
+
 	//int choice=0;
 	//int fd_fifo_in = open("/dev/rtf/1", O_RDWR);
 	while(1){

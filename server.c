@@ -193,13 +193,13 @@ int main(int argc, char *argv[])
 			}
 			hp = gethostbyname(ip);		// converts hostname input (e.g. 10.3.52.15)
 			bcopy((char *)hp->h_addr, (char *)&server.sin_addr, hp->h_length);
-			printf("(1) Turn on LED 1\n(2) Turn off LED 1\n(3) Turn on LED 2\n(4) Turn off LED 2\n> ");
+			printf("(1) Toggle LED 1\n(2) Toggle LED 2\n(3) Flip Switch 1\n(4) Flip Switch 2\n(5) Flip Switch 3\n> ");
 			while((c<1) | (c>j)){
 				scanf("%d",&c);
 			}
 //			switch(c){
 //			case 1:
-
+			c = c-1;
 			n = sendto(sock, &c, sizeof(c), 0, (const struct sockaddr *)&server,length);
 //				break;
 //			case 2:

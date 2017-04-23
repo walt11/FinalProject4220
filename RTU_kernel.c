@@ -77,6 +77,15 @@ static void LEDTask(int x){
 	while(1){
 		if(rtf_get(1, &buf, sizeof(buf)) > 0){
 			printk("FROM FIFO 1: %d\n",buf);
+			if(buf == 0){
+				*PBDR |= 0x80;
+			}else if(buf == 1){
+				*PBDR &= ~0x80;
+			}else if(buf == 2){
+				*PBDR |= 0x40;
+			}else if(buf == 3){
+				*PBDR &= ~0x40;
+			}
 			do_gettimeofday(&t);
 			printk("sec: %d \tusec: %d\n", t.tv_sec, t.tv_usec);
 			rtf_put(2, &t, sizeof(t));
