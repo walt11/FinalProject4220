@@ -1,7 +1,10 @@
-/*
- *  Created on: April 14, 2017
- *      Author: walterjd
- */
+/* 
+###################################################
+	Authors:	John Walter
+				Evan Schulte
+	Project:	ECE 4220 Final Project: RTU System
+###################################################
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>

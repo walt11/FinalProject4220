@@ -1,10 +1,10 @@
-/*
-
-Author:		John Walter
-Project:	4220 Final Project
-
+/* 
+###################################################
+	Authors:	John Walter
+				Evan Schulte
+	Project:	ECE 4220 Final Project: RTU System
+###################################################
 */
-
 #ifndef MODULE
 #define MODULE
 #endif

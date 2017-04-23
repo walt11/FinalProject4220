@@ -1,8 +1,10 @@
-/* 	Name       : 	server_tcp.c
-	Author     : 	Luis A. Rivera
-	Description: 	ECE 4220/7220 lab, Fall 2012
-					Lab 5. Simple server (TCP) for lecture purposes			*/
-
+/* 
+###################################################
+	Authors:	John Walter
+				Evan Schulte
+	Project:	ECE 4220 Final Project: RTU System
+###################################################
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
